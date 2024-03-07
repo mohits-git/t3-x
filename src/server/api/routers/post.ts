@@ -19,7 +19,8 @@ export const postRouter = createTRPCRouter({
 
       return ctx.db.post.create({
         data: {
-          name: input.name,
+          content: input.name,
+          authorId: '1'
         },
       });
     }),
