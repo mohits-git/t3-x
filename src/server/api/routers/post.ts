@@ -1,37 +1,31 @@
-import { z } from "zod";
-
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { type User, clerkClient } from "@clerk/nextjs/server";
+import { TRPCError } from "@trpc/server";
+
+const filterUsers = (user: User) => {
+  return { id: user.id, name: `${user.firstName} ${user.lastName}` , username: user.username ?? 'Anon', email: user.emailAddresses[0], profileImageUrl: user.imageUrl }
+}
 
 export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    const posts = await ctx.db.post.findMany({
+      take: 100
+    });
+
+    const users = (
+      await clerkClient.users.getUserList({
+        userId: posts.map((post) => post.authorId),
+        limit: 100
+      })
+    ).map(filterUsers);
+
+    return posts.map(post => {
+      const author = users.find(user => user.id === post.authorId);
+      if(!author) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Author not found" });
       return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-
-  create: publicProcedure
-    .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return ctx.db.post.create({
-        data: {
-          content: input.name,
-          authorId: '1'
-        },
-      });
-    }),
-
-  getLatest: publicProcedure.query(({ ctx }) => {
-    return ctx.db.post.findFirst({
-      orderBy: { createdAt: "desc" },
+        post,
+        author 
+      }
     });
   }),
-
-  getAll: publicProcedure.query(async ({ ctx }) => {
-      return ctx.db.post.findMany({});
-  })
 });
