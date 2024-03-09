@@ -12,7 +12,6 @@ import { ZodError } from "zod";
 
 import { db } from "@/server/db";
 import { currentUser } from "@clerk/nextjs/server";
-import type { RequestLike } from "node_modules/@clerk/nextjs/dist/types/server/types";
 
 /**
  * 1. CONTEXT
@@ -26,7 +25,7 @@ import type { RequestLike } from "node_modules/@clerk/nextjs/dist/types/server/t
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers, req: RequestLike }) => {
+export const createTRPCContext = async (opts: { headers: Headers }) => {
   const user = await currentUser();
   return {
     db,
