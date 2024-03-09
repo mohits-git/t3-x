@@ -4,11 +4,11 @@ import Image from "next/image";
 import LoadingSpinner, { LoadingButton } from "./Loading";
 import { api } from "@/trpc/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function CreatePostWizard() {
   const { isSignedIn, user, isLoaded: userLoaded } = useUser();
   const [input, setInput] = useState<string>("");
-  const [error, setError] = useState<string>("");
 
   const ctx = api.useUtils();
 
@@ -18,7 +18,12 @@ export default function CreatePostWizard() {
       void ctx.post.getAll.invalidate();
     },
     onError: (error) => {
-      setError(error.message)
+      const errorMessage = error.data?.zodError?.fieldErrors.content;
+      if (errorMessage?.[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error(error.message);
+      }
     }
   });
 
@@ -41,7 +46,6 @@ export default function CreatePostWizard() {
             className="bg-transparent text-lg h-full w-full flex items-center"
             onSubmit={e => {
               e.preventDefault();
-              setError('');
               mutate({ content: input });
             }}
           >
@@ -53,19 +57,24 @@ export default function CreatePostWizard() {
               onChange={e => setInput(e.target.value)}
               disabled={isPosting}
             />
+            {input !== "" && !isPosting &&
+              (<button className="shrink-0 py-2 px-6 me-2 text-sm text-white bg-black rounded-lg inline-flex items-center">
+                Post
+              </button>)}
+
+            {isPosting && <div className="flex justify-center items-center me-2 px-6 py-2 shrink-0 rounded-lg">
+              <LoadingSpinner size={20} />
+            </div>}
+
           </form>
         </div>
         {!userLoaded ? <LoadingButton /> :
-          <div className="py-2 px-3 me-2 text-sm text-white bg-black rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-white focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 inline-flex items-center">
+          <div className="py-2 px-3 me-2 text-sm text-white bg-black rounded-lg border border-gray-200 inline-flex items-center">
             {!isSignedIn && <SignInButton />}
             {isSignedIn && <SignOutButton />}
           </div>
         }
       </div>
-      {error !== "" && <div className="text-sm text-red-500">
-        {error}
-      </div>
-      }
     </div>
   )
 }
