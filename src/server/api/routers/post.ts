@@ -3,6 +3,16 @@ import { type User, clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
+import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
+
+// Create a new ratelimiter, that allows 10 requests per 10 seconds
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "1 m"),
+  analytics: true,
+});
+
 const filterUsers = (user: User) => {
   return { id: user.id, name: `${user.firstName} ${user.lastName}`, username: user.username ?? 'anon', email: user.emailAddresses[0], profileImageUrl: user.imageUrl }
 }
@@ -36,6 +46,13 @@ export const postRouter = createTRPCRouter({
   create: privateProcedure
     .input(z.object({ content: z.string().emoji().min(1).max(255) }))
     .mutation(async ({ ctx, input }) => {
+      
+      const { success } = await ratelimit.limit(ctx.currentUser);
+
+      if(!success) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "You can only post 3 times with in a minute."})
+      }
+
       const post = await ctx.db.post.create({
         data: {
           authorId: ctx.currentUser,
