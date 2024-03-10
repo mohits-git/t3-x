@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata = {
   title: {
     template: '%s | T3-X 🦆',
-    default : 'Home | T3-X 🦆',
+    default: 'Home | T3-X 🦆',
   },
   description: "Emoji-only twitter created with t3 stack.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
@@ -42,7 +42,11 @@ export default function RootLayout({
             }}
           />
           <TRPCReactProvider>
-            {children}
+            <main className="container mx-auto flex flex-col items-center justify-center">
+              <div className="w-full h-screen overflow-y-scroll max-w-2xl border-x border-x-white/30">
+                {children}
+              </div>
+            </main>
           </TRPCReactProvider>
         </body>
       </html>

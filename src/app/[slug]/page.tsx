@@ -7,7 +7,7 @@ import ProfileView from "../_components/ProfileView";
 // import { createTRPCContext } from '@/server/api/trpc';
 // import { TRPCError } from '@trpc/server';
 
-export async function generateMetadata({ params }: Props ): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = params;
   return {
     title: `Profile (@${slug})`,
@@ -21,15 +21,11 @@ type Props = {
 }
 
 export default function ProfilePage(
-  { params }: Props 
+  { params }: Props
 ) {
   const { slug } = params;
   return (
-    <main className="container mx-auto flex min-h-screen flex-col items-center justify-center">
-      <div className="w-full min-h-screen max-w-2xl border-x border-x-white/30">
-        <ProfileView userId={slug} />
-      </div>
-    </main>
+    <ProfileView userId={slug} />
   )
 }
 

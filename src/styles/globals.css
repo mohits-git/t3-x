@@ -3,5 +3,16 @@
 @tailwind utilities;
 
 body {
-  @apply bg-black text-slate-100
+  @apply bg-black text-slate-100;
+}
+
+body main div {
+  overscroll-behavior: none;
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+body main div::-webkit-scrollbar { 
+    width: 0;
+    display: none;  /* Safari and Chrome */
 }
