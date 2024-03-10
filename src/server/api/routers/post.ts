@@ -1,7 +1,8 @@
 import { createTRPCRouter, privateProcedure, publicProcedure } from "@/server/api/trpc";
-import { type User, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { filterUser } from "@/server/utils";
 
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
@@ -12,10 +13,6 @@ const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(3, "1 m"),
   analytics: true,
 });
-
-const filterUsers = (user: User) => {
-  return { id: user.id, name: `${user.firstName} ${user.lastName}`, username: user.username ?? 'anon', email: user.emailAddresses[0], profileImageUrl: user.imageUrl }
-}
 
 export const postRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -31,7 +28,7 @@ export const postRouter = createTRPCRouter({
         userId: posts.map((post) => post.authorId),
         limit: 100
       })
-    ).map(filterUsers);
+    ).map(filterUser);
 
     return posts.map(post => {
       const author = users.find(user => user.id === post.authorId);

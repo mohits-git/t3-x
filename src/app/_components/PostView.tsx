@@ -13,7 +13,7 @@ export default function PostView({ post, author }: PostWithUser) {
     <div className="p-6 w-full bg-white/5 border-y border-y-white/10 space-y-2">
       <Link href={`/post/${post.id}`}>
         <div className="flex items-start space-x-3">
-          <Link href={`/${author.username}`}>
+          <Link href={`/${author.id}`}>
             <div className="rounded-full max-w-10 max-h-10 overflow-hidden shrink-0">
               <Image
                 src={author.profileImageUrl ?? "/favicon.ico"}
@@ -25,10 +25,10 @@ export default function PostView({ post, author }: PostWithUser) {
           </Link>
           <div>
             <div className="gap-1 flex text-sm text-muted">
-              <Link href={`/${author.username}`}>
+              <Link href={`/${author.id}`}>
                 <span className="font-medium text-white">{author.name}</span>
               </Link>
-              <Link href={`/${author.username}`}>
+              <Link href={`/${author.id}`}>
                 <span>{`@${author.username}`}</span>
               </Link>
               <span>{`·`}</span>

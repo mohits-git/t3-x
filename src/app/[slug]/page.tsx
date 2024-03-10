@@ -1,14 +1,25 @@
 import { type Metadata } from "next";
+import ProfileView from "../_components/ProfileView";
 
-export const metadata: Metadata = {
-  title: "Profile"
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Profile",
+  }
 }
 
-export default function ProfilePage() {
+type Params = {
+  params: {
+    slug: string,
+  },
+}
+
+export default function ProfilePage({ params }: Params) {
+  const { slug } = params;
+
   return (
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center">
       <div className="w-full min-h-screen max-w-2xl border-x border-x-white/30">
-        Profile View
+        <ProfileView userId={slug}/>
       </div>
     </main>
   )
