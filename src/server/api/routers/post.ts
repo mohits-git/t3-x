@@ -1,38 +1,7 @@
 import { createTRPCRouter, privateProcedure, publicProcedure } from "@/server/api/trpc";
-import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { filterUser } from "@/server/utils";
-
-import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
-import { Redis } from "@upstash/redis"; // see below for cloudflare and fastly adapters
-import type { Post } from "@prisma/client";
-
-// Create a new ratelimiter, that allows 10 requests per 10 seconds
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(3, "1 m"),
-  analytics: true,
-});
-
-
-const addUsersInfoForPosts = async (posts: Post[]) => {
-    const users = (
-      await clerkClient.users.getUserList({
-        userId: posts.map((post) => post.authorId),
-        limit: 100
-      })
-    ).map(filterUser);
-
-    return posts.map(post => {
-      const author = users.find(user => user.id === post.authorId);
-      if (!author) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Author not found" });
-      return {
-        post,
-        author
-      }
-    });
-}
+import { addUsersInfoForPosts, ratelimit } from "@/server/utils";
 
 export const postRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -46,13 +15,27 @@ export const postRouter = createTRPCRouter({
     return await addUsersInfoForPosts(posts);
   }),
 
+  getPostById: publicProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const post = await ctx.db.post.findUnique({ where: { id: input.postId } });
+      if (!post) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      return (await addUsersInfoForPosts([post]))[0];
+    }),
+
   getPostByUserId: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
       const posts = await ctx.db.post.findMany({
         where: {
           authorId: input.userId
-        }
+        },
+        take: 50,
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       return await addUsersInfoForPosts(posts);
