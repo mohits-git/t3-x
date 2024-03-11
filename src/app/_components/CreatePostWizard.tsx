@@ -51,11 +51,11 @@ export default function CreatePostWizard() {
           >
             <input
               type="text"
-              placeholder="Type some emojis"
+              placeholder={!user ? "Signin to post your emojis" : "Type some emojis"}
               className="bg-transparent text-lg px-2 py-1 w-full outline-none placeholder:text-muted-dark"
               value={input}
               onChange={e => setInput(e.target.value)}
-              disabled={isPosting}
+              disabled={isPosting || !user}
             />
             {input !== "" && !isPosting &&
               (<button className="shrink-0 py-2 px-6 me-2 text-sm text-white bg-black rounded-lg inline-flex items-center">
