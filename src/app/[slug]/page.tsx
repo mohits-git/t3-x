@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import ProfileView from "../_components/ProfileView";
+import ProfileFeed from "../_components/ProfileFeed";
 // import { createServerSideHelpers } from '@trpc/react-query/server';
 // import superjson from 'superjson';
 // import { type GetServerSidePropsContext } from "next";
@@ -25,7 +26,10 @@ export default function ProfilePage(
 ) {
   const { slug } = params;
   return (
-    <ProfileView userId={slug} />
+    <>
+      <ProfileView userId={slug} />
+      <ProfileFeed userId={slug} />
+    </>
   )
 }
 

@@ -16,7 +16,7 @@ export default function ProfileView({ userId }: { userId: string }) {
 
   if (!data)
     return (
-      <div className="flex justify-center w-full h-full">
+      <div className="flex justify-center w-full h-full border-b border-b-white/30">
         User Not Found
       </div>
     )
@@ -27,13 +27,12 @@ export default function ProfileView({ userId }: { userId: string }) {
         <Image src={'/bannereyes.jpeg'} width={1000} height={500} alt={"Banner image"} className="-mt-[15%]" />
       </div>
 
-      <div className="mx-5 -mt-20 absolute rounded-full w-36 h-36 bg-red-400 overflow-hidden border-4 border-black">
+      <div className="mx-5 -mt-20 relative rounded-full w-36 h-36 bg-red-400 overflow-hidden border-4 border-black">
         <Image src={data.profileImageUrl} fill alt={`${data.name}'s profile image`} className="bg-black" />
       </div>
 
-      <div className="h-20 "></div>
 
-      <div className="px-4 flex flex-col border-b border-white/30 pb-6">
+      <div className="px-4 flex flex-col border-b border-white/20 mt-6 pb-6">
         <h2 className="text-white text-xl font-bold">{data.name}</h2>
         <h4 className="text-muted"><span className="text-sm">@</span>{data.username}</h4>
 
